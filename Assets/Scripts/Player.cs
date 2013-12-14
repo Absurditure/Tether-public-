@@ -3,12 +3,19 @@ using System.Collections;
 
 public class Player : MonoBehaviour 
 {
+	//Ref
+	public Transform ropeOriginRef;
+
 	//setup
 	Rigidbody2D myRigidbody2D;
 	private bool playerCanMove = false;
 
 	//public variables
 	public float moveForce;
+
+	//public ref
+	public bool setTether = false;
+	public bool cutTether = false;
 	
 	void Start () 
 	{
@@ -49,6 +56,12 @@ public class Player : MonoBehaviour
 
 		while(true)
 		{
+			if (Input.GetButton("Fire1"))
+			{
+				cutTether = true;
+				GameObject.Find("line6").SetActive(false);
+				gameObject.GetComponent<SpringJoint2D>().enabled = false;
+			}
 
 			yield return 0;
 		}
@@ -63,6 +76,14 @@ public class Player : MonoBehaviour
 
 		while(true)
 		{
+			if (Input.GetButtonDown("Fire1"))
+			{
+				setTether = true;
+			}
+			else
+			{
+				setTether = false;
+			}
 
 			yield return 0;
 		}
