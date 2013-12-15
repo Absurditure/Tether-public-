@@ -5,6 +5,7 @@ public class Player : MonoBehaviour
 {
 	//Ref
 	public Transform ropeOriginRef;
+	private Vector2 otherVel;
 
 	//setup
 	Rigidbody2D myRigidbody2D;
@@ -27,6 +28,7 @@ public class Player : MonoBehaviour
 	{
 		if (playerCanMove == true)
 		{
+			//rigidbody2D.AddForceAtPosition(moveForce, myRigidbody2D);
 			rigidbody2D.AddForce(Vector2.up * Input.GetAxis("Vertical") * moveForce);
 			rigidbody2D.AddForce(Vector2.right * Input.GetAxis("Horizontal") * moveForce);
 		}
@@ -37,6 +39,7 @@ public class Player : MonoBehaviour
 		if (other.gameObject.CompareTag("Solid") )
 		{
 			StartCoroutine ("Landed");
+			otherVel = other.rigidbody2D.velocity;
 		}
 	}
 
@@ -76,6 +79,13 @@ public class Player : MonoBehaviour
 
 		while(true)
 		{
+
+			//stay with object player is on
+			if (otherVel != null)
+			{
+				rigidbody2D.AddForce(otherVel * 8); // other vel * my current drag to cancel drag
+			}
+
 			if (Input.GetButtonDown("Fire1"))
 			{
 				setTether = true;
