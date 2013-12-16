@@ -6,21 +6,29 @@ public class Player : MonoBehaviour
 	//Ref
 	public Transform ropeOriginRef;
 	private Vector2 otherVel;
+	private GameObject line6Ref;
 
 	//setup
 	Rigidbody2D myRigidbody2D;
 	private bool playerCanMove = false;
+	private bool boost = false;
+	private bool boostUsed = false;
+	public AudioClip HitSurface;
+	public AudioClip boostAudio;
 
 	//public variables
 	public float moveForce;
 
-	//public ref
+	//public ref 
 	public bool setTether = false;
 	public bool cutTether = false;
+
 	
 	void Start () 
 	{
 		myRigidbody2D = rigidbody2D;
+		line6Ref = GameObject.Find ("line6");
+		StartCoroutine("Floating");
 	}
 	
 	//Physics update
@@ -36,11 +44,22 @@ public class Player : MonoBehaviour
 
 	void OnTriggerEnter2D(Collider2D other)
 	{
-		if (other.gameObject.CompareTag("Solid") )
+		if (other.gameObject.CompareTag("Solid") || other.gameObject.CompareTag("PlayerShip") )
 		{
 			StartCoroutine ("Landed");
 			otherVel = other.rigidbody2D.velocity;
 		}
+
+//		if (other.gameObject.CompareTag("Tether") )
+//		{
+//			cutTether = false;
+//
+//			//GameObject.Find("line6").SetActive(true);
+//			Instantiate(line6Ref , transform.position, Quaternion.identity);
+//	
+//			gameObject.GetComponent<SpringJoint2D>().enabled = true;
+//		}
+
 	}
 
 	void OnTriggerExit2D(Collider2D other)
@@ -59,12 +78,20 @@ public class Player : MonoBehaviour
 
 		while(true)
 		{
-			if (Input.GetButton("Fire1"))
+			CheckTether();
+			CheckBoost();
+			CheckRestart();
+
+			if(boost == true & boostUsed == false)
 			{
-				cutTether = true;
-				GameObject.Find("line6").SetActive(false);
-				gameObject.GetComponent<SpringJoint2D>().enabled = false;
+				playerCanMove = true;
+				audio.PlayOneShot(boostAudio);
+
+				yield return new WaitForSeconds(1);
+				boostUsed = true;
 			}
+			else 
+				playerCanMove = false;
 
 			yield return 0;
 		}
@@ -74,12 +101,16 @@ public class Player : MonoBehaviour
 	{
 		StopCoroutine("Floating");
 
+		audio.PlayOneShot(HitSurface);
+
 		myRigidbody2D.drag = 8;
 		playerCanMove = true;
 
 		while(true)
 		{
-
+			CheckTether();
+			CheckRestart();
+				
 			//stay with object player is on
 			if (otherVel != null)
 			{
@@ -88,7 +119,7 @@ public class Player : MonoBehaviour
 
 			if (Input.GetButtonDown("Fire1"))
 			{
-				setTether = true;
+				//setTether = true;
 			}
 			else
 			{
@@ -99,5 +130,34 @@ public class Player : MonoBehaviour
 		}
 	}
 
+	void CheckTether()
+	{
+		if (Input.GetButton("Fire1"))
+		{
+			cutTether = true;
+			if (GameObject.Find("line6") != null)
+			{
+				GameObject.Find("line6").SetActive(false);
+			}
+			gameObject.GetComponent<SpringJoint2D>().enabled = false;
+		}
+	}
 
+	void CheckBoost()
+	{
+		if (Input.GetButton("Fire2"))
+		{
+			boost = true;
+		}
+	}
+
+	void CheckRestart()
+	{
+		if (Input.GetKeyDown("r") )
+		{
+			Application.LoadLevel("Test");
+		}
+	}
+	
+	
 }
